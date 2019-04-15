@@ -27,6 +27,10 @@ class Backend
 
   void ChangeValues(std::string name, int weight);// updates the values of every node using the specified ingrediant and weighting
 
+  void addToHeap(Node *recipie);//adds a node to the bottom of the heap
+
+  void removeFromHeap();//removes the root of the heap
+
   private:
 
   int parent(int idx);//returns parent of the given node
