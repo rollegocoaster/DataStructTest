@@ -23,7 +23,9 @@ class Backend
 
   void PrintHeap();// outputs all values in the heap
 
-  void ReHeap();// updates the heap to make sure it it a valid heap
+  void ReHeap(Node* arr[],int i);// updates the heap to make sure it it a valid heap
+
+  void HeapSort(Node* arr[]);// sorts the values using heap sort
 
   void ChangeValues(std::string name, int weight);// updates the values of every node using the specified ingrediant and weighting
 
