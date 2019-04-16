@@ -26,17 +26,13 @@ CONFIG += c++11
 
 SOURCES += \
         main.cpp \
-        mealreccomendgui.cpp \
-    reccomendations.cpp
+        mealreccomendgui.cpp
 
 HEADERS += \
-        mealreccomendgui.h \
-    reccomendations.h
+        mealreccomendgui.h
 
 FORMS += \
-        mealreccomendgui.ui \
-    reccomendations.ui \
-    reccomendations.ui
+        mealreccomendgui.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

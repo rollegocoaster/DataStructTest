@@ -6,12 +6,25 @@
 #include <QPalette>
 #include <QGradient>
 #include <string>
-#include <reccomendations.h>
 #include <vector>
 #include <QTimer>
 
+struct preferences{
+    std::vector<std::string>positiveIngredients;
+    std::vector<std::string>negativeIngredients;
+    std::string foodStylePositive;
+    std::string foodStyleNegative;
+    std::string regionPositive;
+    std::string regionNegative;
+    int recipeComplexity; // if -1 user has no preference
 
+    preferences(){
+        recipeComplexity = -1;
+        foodStylePositive = foodStyleNegative = "";
+        regionPositive = regionNegative = "";
 
+    }
+};
 
 
 
@@ -31,7 +44,6 @@ class MealReccomendGUI : public QMainWindow
 public:
     explicit MealReccomendGUI(QWidget *parent = nullptr);
     ~MealReccomendGUI();
-    std::string const getTestString(){return testString;}
     preferences *UserPreferences;
 
 signals:
@@ -48,6 +60,8 @@ private slots:
 
     void on_deletePositive_clicked();
 
+    void on_deleteNegative_clicked();
+
 protected:
     //void timerEvent(QTimerEvent *event);
     //void resizeEvent(QResizeEvent *event);
@@ -58,9 +72,6 @@ private:
     QPalette Cpalette;
     QLinearGradient *BackgroundGradient;
     QLinearGradient *ButtonGradient;
-    reccomendations *window2;
-    int timer;
-
 
 
     /*Color palette
@@ -77,7 +88,6 @@ private:
     background: rgb(194, 68, 35);
 
     */
-    std::string testString;
 
 };
 

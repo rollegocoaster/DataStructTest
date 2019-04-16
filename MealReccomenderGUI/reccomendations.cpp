@@ -11,6 +11,7 @@ reccomendations::reccomendations(QWidget *parent) :
 
 void reccomendations::sendInformation(preferences *inputtedPreference)
 {
+    this->update();
     QString string = "";
     string+= inputtedPreference->foodStylePositive[0];
     for(unsigned i=1; i<inputtedPreference->foodStylePositive.size(); i++){

@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <string>
+#include <QCloseEvent>
 
 struct preferences{
     std::vector<std::string>positiveIngredients;
