@@ -5,6 +5,7 @@
 struct preferences{
     std::vector<std::string>positiveIngredients;
     std::vector<std::string>negativeIngredients;
+    std::vector<int>negativeIngredientsWeight; // if 0 use default
     std::string foodStylePositive;
     std::string foodStyleNegative;
     std::string regionPositive;
