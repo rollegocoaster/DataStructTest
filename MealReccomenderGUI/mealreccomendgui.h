@@ -9,9 +9,14 @@
 #include <vector>
 #include <QTimer>
 
+
+
+
 struct preferences{
     std::vector<std::string>positiveIngredients;
+
     std::vector<std::string>negativeIngredients;
+    std::vector<int>negativeIngredientsWeight; // if 0 use default
     std::string foodStylePositive;
     std::string foodStyleNegative;
     std::string regionPositive;
@@ -50,7 +55,8 @@ signals:
     void timeOut();
     //void valueChanged();
 
-
+public slots:
+    void somethingHappened();
 
 private slots:
     void on_Generate_clicked();
@@ -62,6 +68,18 @@ private slots:
 
     void on_deleteNegative_clicked();
 
+    void on_add_neg_ingredient_clicked();
+
+    void on_reset_clicked();
+
+    void on_regionalFood_currentIndexChanged(int index);
+
+    void on_food_type_currentIndexChanged(int index);
+
+    void on_negFood_type_currentIndexChanged(int index);
+
+    void on_complexity_valueChanged(int arg1);
+
 protected:
     //void timerEvent(QTimerEvent *event);
     //void resizeEvent(QResizeEvent *event);
@@ -72,7 +90,8 @@ private:
     QPalette Cpalette;
     QLinearGradient *BackgroundGradient;
     QLinearGradient *ButtonGradient;
-
+    double fontResize = 0;
+    bool resetConfirmed = false;
 
     /*Color palette
     lightBlue: #0597F2, rgb(5,151,242)

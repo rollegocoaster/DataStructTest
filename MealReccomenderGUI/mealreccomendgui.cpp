@@ -4,6 +4,7 @@
 #include <QString>
 #include <string>
 #include <QtDebug>
+#include <QResizeEvent>
 
 MealReccomendGUI::MealReccomendGUI(QWidget *parent) :
     QMainWindow(parent),
@@ -26,7 +27,7 @@ MealReccomendGUI::MealReccomendGUI(QWidget *parent) :
 
     this->setPalette(Cpalette);
     Cpalette.setBrush(QPalette::Button,*ButtonGradient);
-    this->setFont(QFont("Open Sans"));
+    this->setFont(QFont("Montserrat"));
     ui->Generate->setPalette(Cpalette);
     QList<QLabel*>  allLabels = this->findChildren<QLabel*>();
     for(int i=0; i < allLabels.count(); i++){
@@ -35,7 +36,9 @@ MealReccomendGUI::MealReccomendGUI(QWidget *parent) :
     this->update();
     ui->deletePositive->hide();
     ui->deleteNegative->hide();
+    ui->Slider_Frame->hide();
     UserPreferences = new preferences();
+    fontResize = 0;
 
 }
 
@@ -66,20 +69,91 @@ void MealReccomendGUI::on_add_Ingredient_clicked()
     if(ui->pos_Ingredients->text() != ""){
         QString inputtedIngredient = ui->pos_Ingredients->text();
         ui->Positives_list->addItem(inputtedIngredient);
+        ui->pos_Ingredients->clear();
     }
+    resetConfirmed = false;
+    ui->reset->setText("Reset Inputs");
+
 }
 
 void MealReccomendGUI::on_deletePositive_clicked()
 {
     ui->Positives_list->takeItem(ui->Positives_list->currentRow());
     ui->deletePositive->hide();
+    resetConfirmed = false;
+    ui->reset->setText("Reset Inputs");
 }
 
 void MealReccomendGUI::on_deleteNegative_clicked()
 {
     ui->Negatives_list->takeItem(ui->Negatives_list->currentRow());
     ui->deleteNegative->hide();
+    resetConfirmed = false;
+    ui->reset->setText("Reset Inputs");
 }
 
 
 
+
+
+
+void MealReccomendGUI::on_add_neg_ingredient_clicked()
+{
+    if(ui->neg_Ingredients->text() != ""){
+        QString inputtedIngredient = ui->neg_Ingredients->text();
+        inputtedIngredient += " - ";
+        inputtedIngredient += QString::number(ui->ingredientIngoreSlider->sliderPosition());
+        ui->Negatives_list->addItem(inputtedIngredient);
+        ui->neg_Ingredients->clear();
+        ui->Slider_Frame->hide();
+        resetConfirmed = false;
+        ui->reset->setText("Reset Inputs");
+    }
+
+}
+
+void MealReccomendGUI::on_reset_clicked()
+{
+    if(!resetConfirmed){
+        ui->reset->setText("Are you sure?");
+        resetConfirmed = true;
+    } else {
+        ui->reset->setText("Reset Inputs");
+        ui->Positives_list->clear();
+        ui->Negatives_list->clear();
+        ui->neg_Ingredients->clear();
+        ui->food_type->setCurrentIndex(0);
+        ui->regionalFood->setCurrentIndex(0);
+        ui->complexity->setValue(0);
+        ui->negFood_type->setCurrentIndex(0);
+        resetConfirmed = false;
+    }
+}
+
+void MealReccomendGUI::somethingHappened(){
+
+}
+
+void MealReccomendGUI::on_regionalFood_currentIndexChanged(int index)
+{
+    resetConfirmed = false;
+    ui->reset->setText("Reset Inputs");
+}
+
+void MealReccomendGUI::on_food_type_currentIndexChanged(int index)
+{
+    resetConfirmed = false;
+    ui->reset->setText("Reset Inputs");
+}
+
+void MealReccomendGUI::on_negFood_type_currentIndexChanged(int index)
+{
+    resetConfirmed = false;
+    ui->reset->setText("Reset Inputs");
+}
+
+void MealReccomendGUI::on_complexity_valueChanged(int arg1)
+{
+    resetConfirmed = false;
+    ui->reset->setText("Reset Inputs");
+}
