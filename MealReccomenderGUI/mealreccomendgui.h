@@ -8,34 +8,9 @@
 #include <string>
 #include <vector>
 #include <QTimer>
+#include "reccomendationsgui.h"
 
-
-
-
-struct preferences{
-    std::vector<std::string>positiveIngredients;
-
-    std::vector<std::string>negativeIngredients;
-    std::vector<int>negativeIngredientsWeight; // if 0 use default
-    std::string foodStylePositive;
-    std::string foodStyleNegative;
-    std::string regionPositive;
-    std::string regionNegative;
-    int recipeComplexity; // if -1 user has no preference
-
-    preferences(){
-        recipeComplexity = -1;
-        foodStylePositive = foodStyleNegative = "";
-        regionPositive = regionNegative = "";
-
-    }
-};
-
-
-
-
-
-
+//preferences are in reccomendationsgui.h
 
 namespace Ui {
 class MealReccomendGUI;
@@ -80,6 +55,8 @@ private slots:
 
     void on_complexity_valueChanged(int arg1);
 
+    void on_ingredientIngoreSlider_valueChanged(int value);
+
 protected:
     //void timerEvent(QTimerEvent *event);
     //void resizeEvent(QResizeEvent *event);
@@ -92,6 +69,7 @@ private:
     QLinearGradient *ButtonGradient;
     double fontResize = 0;
     bool resetConfirmed = false;
+    reccomendationsGUI* window2;
 
     /*Color palette
     lightBlue: #0597F2, rgb(5,151,242)

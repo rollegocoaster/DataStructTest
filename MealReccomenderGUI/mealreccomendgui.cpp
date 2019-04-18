@@ -38,7 +38,9 @@ MealReccomendGUI::MealReccomendGUI(QWidget *parent) :
     ui->deleteNegative->hide();
     ui->Slider_Frame->hide();
     UserPreferences = new preferences();
-    fontResize = 0;
+    window2 = new reccomendationsGUI(this,&Cpalette);
+    window2->hide();
+    ui->errorMessages->hide();
 
 }
 
@@ -52,15 +54,60 @@ MealReccomendGUI::~MealReccomendGUI()
     delete ButtonGradient;
     delete ui;
     delete UserPreferences;
+    delete window2;
 
 }
 
 void MealReccomendGUI::on_Generate_clicked()
 {
+    if(ui->complexity->value() == 1){
+        ui->errorMessages->setText("unable to generate suggestions, try setting complexity value to a higher number");
+        ui->errorMessages->show();
+        return;
+    }else if(ui->complexity->value()==0){
+        UserPreferences->recipeComplexity = -1;
+    }else{
+        UserPreferences->recipeComplexity = ui->complexity->value();
+    }
+    ui->errorMessages->hide();
     UserPreferences->positiveIngredients.clear();
     for(int i=0; i < ui->Positives_list->count(); i++){
         UserPreferences->positiveIngredients.push_back(ui->Positives_list->item(i)->text().toStdString());
     }
+    UserPreferences->negativeIngredients.clear();
+    UserPreferences->negativeIngredientsWeight.clear();
+    for(int i=0; i < ui->Negatives_list->count(); i++){
+        QString inputtedText = ui->Negatives_list->item(i)->text();
+        if(inputtedText.endsWith("0")){
+            UserPreferences->negativeIngredientsWeight.push_back(10);
+            inputtedText.remove("10");
+        } else {
+            UserPreferences->negativeIngredientsWeight.push_back(inputtedText.at(inputtedText.length()-1).digitValue());
+            inputtedText.remove(inputtedText.length()-1, 1);
+        }
+        inputtedText.remove(" - ");
+        UserPreferences->negativeIngredients.push_back(inputtedText.toStdString());
+    }
+
+    if(ui->regionalFood->currentIndex()>0) UserPreferences->regionPositive = ui->regionalFood->currentText().toStdString();
+    else UserPreferences->regionPositive = "";
+
+    if(ui->neg_Region->currentIndex()>0) UserPreferences->regionNegative = ui->neg_Region->currentText().toStdString();
+    else UserPreferences->regionNegative = "";
+
+    if(ui->food_type->currentIndex()>0)
+        UserPreferences->foodStylePositive = ui->food_type->currentText().toStdString();
+    else
+        UserPreferences->foodStylePositive = "";
+
+    if(ui->negFood_type->currentIndex()>0) UserPreferences->foodStyleNegative = ui->negFood_type->currentText().toStdString();
+    else UserPreferences->foodStyleNegative = "";
+
+    window2->preferencesSent(UserPreferences);
+    //this->hide();
+    window2->show();
+
+
 
 }
 
@@ -156,4 +203,13 @@ void MealReccomendGUI::on_complexity_valueChanged(int arg1)
 {
     resetConfirmed = false;
     ui->reset->setText("Reset Inputs");
+    ui->errorMessages->hide();
+}
+
+void MealReccomendGUI::on_ingredientIngoreSlider_valueChanged(int value)
+{
+    QString text = "Importance: ";
+    text.append(QString::number(value));
+    ui->label_8->setText(text);
+
 }
