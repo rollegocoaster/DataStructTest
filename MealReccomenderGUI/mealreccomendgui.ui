@@ -718,21 +718,6 @@
                <string>No preference</string>
               </property>
              </item>
-             <item>
-              <property name="text">
-               <string>Italian</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>chinese</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>etc.</string>
-              </property>
-             </item>
             </widget>
            </item>
            <item>

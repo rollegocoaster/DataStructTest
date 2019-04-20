@@ -1,3 +1,12 @@
+/* Sources
+Qt
+
+MealDatabase
+
+for assistance in accessing a JSON webservice (ie MealDatabase)
+https://makina-corpus.com/blog/metier/archives/access-json-webservice-qt-c
+
+*/
 #include "mealreccomendgui.h"
 #include "ui_mealreccomendgui.h"
 #include <QLineEdit>
@@ -5,12 +14,20 @@
 #include <string>
 #include <QtDebug>
 #include <QResizeEvent>
+#include <QNetworkReply>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QJsonValue>
+#include <sstream>
 
 MealReccomendGUI::MealReccomendGUI(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MealReccomendGUI)
 {
+
     ui->setupUi(this);
+    networkManager = new QNetworkAccessManager(this);
     this->setMinimumHeight(500);
 
     Cpalette = this->palette();
@@ -42,6 +59,22 @@ MealReccomendGUI::MealReccomendGUI(QWidget *parent) :
     window2->hide();
     ui->errorMessages->hide();
 
+    // getting info from mealDatabase
+    //networkManager->connectToHostEncrypted("https://www.themealdb.com/api/json/v1/1/random.php");
+    this->timer.start(100);
+
+    for(int i=0; i<NUMBER_OF_RECIPES_ADDED; i++){
+         this->theMealDB = new QUrl("https://www.themealdb.com/api/json/v1/1/random.php");
+        this->request = new QNetworkRequest();
+        if(!this->theMealDB->isValid())  qDebug() << "it is not valid";
+        qDebug() << "setting url";
+        this->request->setUrl(*this->theMealDB);
+        qDebug() << "getting request";
+        this->currentReply = networkManager->get(*this->request);
+    }
+    connect(networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(MealDBResult(QNetworkReply*)));
+    connect(&this->timer, SIGNAL(timeout()), this, SLOT(updateInfo()));
+
 }
 
 
@@ -55,9 +88,18 @@ MealReccomendGUI::~MealReccomendGUI()
     delete ui;
     delete UserPreferences;
     delete window2;
-
+    delete networkManager;
+    delete theMealDB;
+    delete request;
 }
 
+
+
+
+/*
+    Preparing user inputs for sending to back end and sending it to the back end
+
+*/
 void MealReccomendGUI::on_Generate_clicked()
 {
     if(ui->complexity->value() == 1){
@@ -123,6 +165,22 @@ void MealReccomendGUI::on_add_Ingredient_clicked()
 
 }
 
+void MealReccomendGUI::on_add_neg_ingredient_clicked()
+{
+    if(ui->neg_Ingredients->text() != ""){
+        QString inputtedIngredient = ui->neg_Ingredients->text();
+        inputtedIngredient += " - ";
+        inputtedIngredient += QString::number(ui->ingredientIngoreSlider->sliderPosition());
+        ui->Negatives_list->addItem(inputtedIngredient);
+        ui->neg_Ingredients->clear();
+        ui->Slider_Frame->hide();
+        resetConfirmed = false;
+        ui->reset->setText("Reset Inputs");
+    }
+
+}
+
+
 void MealReccomendGUI::on_deletePositive_clicked()
 {
     ui->Positives_list->takeItem(ui->Positives_list->currentRow());
@@ -141,30 +199,14 @@ void MealReccomendGUI::on_deleteNegative_clicked()
 
 
 
-
-
-
-void MealReccomendGUI::on_add_neg_ingredient_clicked()
-{
-    if(ui->neg_Ingredients->text() != ""){
-        QString inputtedIngredient = ui->neg_Ingredients->text();
-        inputtedIngredient += " - ";
-        inputtedIngredient += QString::number(ui->ingredientIngoreSlider->sliderPosition());
-        ui->Negatives_list->addItem(inputtedIngredient);
-        ui->neg_Ingredients->clear();
-        ui->Slider_Frame->hide();
-        resetConfirmed = false;
-        ui->reset->setText("Reset Inputs");
-    }
-
-}
-
 void MealReccomendGUI::on_reset_clicked()
 {
-    if(!resetConfirmed){
+    if(!resetConfirmed)
+    { // two click reset functionality
         ui->reset->setText("Are you sure?");
         resetConfirmed = true;
     } else {
+        // resetting all
         ui->reset->setText("Reset Inputs");
         ui->Positives_list->clear();
         ui->Negatives_list->clear();
@@ -177,30 +219,109 @@ void MealReccomendGUI::on_reset_clicked()
     }
 }
 
-void MealReccomendGUI::somethingHappened(){
+//////////////////////////////////////////////////////////////////////////////
+//        Getting info from meal database and storing it in backend         //
+//        and elements in frontend                                          //
 
+void MealReccomendGUI::MealDBResult(QNetworkReply* reply){
+    QByteArray removingQuotes = reply->readAll();
+    while(removingQuotes.indexOf('"') != -1){
+        removingQuotes.remove(removingQuotes.indexOf('"'),1);
+    }
+    std::stringstream output;
+    output << removingQuotes.toStdString();
+
+    std::string data;
+    std::stringstream dataSplitter;
+    std::string splitData[2];
+    std::vector<std::string>:: iterator i;
+    std::getline(output,data,',');
+    while(std::getline(output,data,',')){
+        dataSplitter.clear();
+        dataSplitter << data;
+        std::getline(dataSplitter,splitData[0],':');
+        std::getline(dataSplitter,splitData[1]);
+        if(splitData[0]=="strCategory"){
+            for(i=categories.begin(); i!=categories.end() && *i != splitData[1]; i++);
+            if(i==categories.end()) categories.push_back(splitData[1]);
+            //add to backend node
+        } else if(splitData[0]=="strMeal"){
+            //add to backend node
+        } else if(splitData[0]=="strArea"){
+            for(i=regions.begin(); i!=regions.end() && *i != splitData[1]; i++);
+            if(i==regions.end()) regions.push_back(splitData[1]);
+        } else if(splitData[0].size() > 12){
+            if(splitData[0].substr(0,13).compare(0,13,"strIngredient")==0){
+               // qDebug() << QString::fromStdString(splitData[1]);
+            }
+        }
+    }
+    this->inputsAdded++;
 }
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+void MealReccomendGUI::updateInfo(){
+    if(this->inputsAdded == NUMBER_OF_RECIPES_ADDED){
+
+        this->timer.stop();
+        for(unsigned int i=0; i < categories.size(); i++){
+            qDebug() << QString::fromStdString(categories.at(i));
+            ui->food_type->addItem(QString::fromStdString(categories.at(i)));
+            ui->negFood_type->addItem(QString::fromStdString(categories.at(i)));
+        }
+        for(unsigned int i=0; i< regions.size(); i++){
+            qDebug() << QString::fromStdString(regions.at(i));
+            ui->regionalFood->addItem(QString::fromStdString(regions.at(i)));
+            ui->neg_Region->addItem(QString::fromStdString(regions.at(i)));
+        }
+        qDebug() << categories.size() << " " << regions.size();
+    }
+}
+
+
+
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///                              code to reset reset button if a change occures
+///
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 void MealReccomendGUI::on_regionalFood_currentIndexChanged(int index)
 {
+    int justToGetThatWarningAway = index;
+    justToGetThatWarningAway++;
     resetConfirmed = false;
     ui->reset->setText("Reset Inputs");
+
 }
 
 void MealReccomendGUI::on_food_type_currentIndexChanged(int index)
 {
+    int justToGetThatWarningAway = index;
+    justToGetThatWarningAway++;
     resetConfirmed = false;
     ui->reset->setText("Reset Inputs");
 }
 
 void MealReccomendGUI::on_negFood_type_currentIndexChanged(int index)
 {
+    int justToGetThatWarningAway = index;
+    justToGetThatWarningAway++;
     resetConfirmed = false;
     ui->reset->setText("Reset Inputs");
 }
 
 void MealReccomendGUI::on_complexity_valueChanged(int arg1)
 {
+    int justToGetThatWarningAway = arg1;
+    justToGetThatWarningAway++;
     resetConfirmed = false;
     ui->reset->setText("Reset Inputs");
     ui->errorMessages->hide();
@@ -208,6 +329,8 @@ void MealReccomendGUI::on_complexity_valueChanged(int arg1)
 
 void MealReccomendGUI::on_ingredientIngoreSlider_valueChanged(int value)
 {
+    int justToGetThatWarningAway = value;
+    justToGetThatWarningAway++;
     QString text = "Importance: ";
     text.append(QString::number(value));
     ui->label_8->setText(text);

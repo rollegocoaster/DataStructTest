@@ -8,9 +8,14 @@
 #include <string>
 #include <vector>
 #include <QTimer>
+#include <QNetworkAccessManager>
+#include <QScriptValue>
 #include "reccomendationsgui.h"
 
 //preferences are in reccomendationsgui.h
+
+const int NUMBER_OF_RECIPES_ADDED = 50;
+
 
 namespace Ui {
 class MealReccomendGUI;
@@ -31,9 +36,13 @@ signals:
     //void valueChanged();
 
 public slots:
-    void somethingHappened();
+
+    void MealDBResult(QNetworkReply* reply);
 
 private slots:
+
+    void updateInfo();
+
     void on_Generate_clicked();
    // void reformat();
 
@@ -58,7 +67,7 @@ private slots:
     void on_ingredientIngoreSlider_valueChanged(int value);
 
 protected:
-    //void timerEvent(QTimerEvent *event);
+
     //void resizeEvent(QResizeEvent *event);
 
 private:
@@ -70,6 +79,16 @@ private:
     double fontResize = 0;
     bool resetConfirmed = false;
     reccomendationsGUI* window2;
+    QNetworkReply* currentReply;
+    QNetworkAccessManager* networkManager;
+    //QList<QScriptValue>categories;
+    QNetworkRequest *request;
+    QUrl *theMealDB;
+    void getFromMealDB();
+    std::vector<std::string>categories;
+    std::vector<std::string>regions;
+    int inputsAdded = 0;
+    QTimer timer;
 
     /*Color palette
     lightBlue: #0597F2, rgb(5,151,242)
