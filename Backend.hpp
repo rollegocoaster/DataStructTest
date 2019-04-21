@@ -6,7 +6,7 @@
 
 struct Node
 {
-  string name;
+  std::string name;
   int value;
   std::vector<std::string> ingrediants;
 };
@@ -23,8 +23,9 @@ struct preferences{
 class Backend
 {
   public:
+  Backend();//default Constructor
 
-  Backend(int size);// constructior has one paramitor the maximum size of the heap
+  Backend(int size);// constructor has one paramitor the maximum size of the heap
 
   ~Backend();// destructor
 
@@ -34,9 +35,9 @@ class Backend
 
   void HeapSort(Node* arr[]);// sorts the values using heap sort
 
-  void ChangeValues(std::string name, preferences pref);// updates the values of every node using the specified ingrediant and weighting
+  void ChangeValues( preferences pref);// updates the values of every node using the specified ingrediant and weighting
 
-  void addToHeap(Node *recipie);//adds a node to the bottom of the heap
+  void addToHeap(Node recipie);//adds a node to the bottom of the heap
 
   Node* removeFromHeap();//removes the root of the heap
 
@@ -48,7 +49,7 @@ class Backend
 
   int rightChild(int idx);//returns the right child of the given node
 
-  Node *Heap;// pointer to the heap
+  Node *Arr;// pointer to the heap
   int currentSize;// the current size of the heap
   int maxSize;// the maximum size of the heap
 
