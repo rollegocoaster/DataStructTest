@@ -55,6 +55,9 @@ private:
     QUrl TheURL;
     QPixmap image;
     bool recipeShown = false;
+    QJsonDocument json;
+    QJsonObject object;
+    QJsonArray info;
 };
 
 #endif // RECCOMENDATIONSGUI_H

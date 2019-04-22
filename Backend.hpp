@@ -6,18 +6,26 @@
 
 struct Node
 {
+  std::string name;
   int value;
   std::vector<std::string> ingrediants;
-  Node* left=NULL;
-  Node* right=NULL;
-  Node* parrent=NULL;
 };
-
+struct preferences{
+    std::vector<std::string>positiveIngredients;
+    std::vector<std::string>negativeIngredients;
+    std::vector<int>negativeIngredientsWeight; // if 0 use default
+    std::string foodStylePositive;
+    std::string foodStyleNegative;
+    std::string regionPositive;
+    std::string regionNegative;
+    int recipeComplexity; // if -1 user has no preference
+  };
 class Backend
 {
   public:
+  Backend();//default Constructor
 
-  Backend(int size);// constructior has one paramitor the maximum size of the heap
+  Backend(int size);// constructor has one paramitor the maximum size of the heap
 
   ~Backend();// destructor
 
@@ -27,11 +35,11 @@ class Backend
 
   void HeapSort(Node* arr[]);// sorts the values using heap sort
 
-  void ChangeValues(std::string name, int weight);// updates the values of every node using the specified ingrediant and weighting
+  void ChangeValues( preferences pref);// updates the values of every node using the specified ingrediant and weighting
 
-  void addToHeap(Node *recipie);//adds a node to the bottom of the heap
+  void addToHeap(Node recipie);//adds a node to the bottom of the heap
 
-  void removeFromHeap();//removes the root of the heap
+  Node* removeFromHeap();//removes the root of the heap
 
   private:
 
@@ -41,7 +49,7 @@ class Backend
 
   int rightChild(int idx);//returns the right child of the given node
 
-  Node *Heap;// pointer to the heap
+  Node *Arr;// pointer to the heap
   int currentSize;// the current size of the heap
   int maxSize;// the maximum size of the heap
 

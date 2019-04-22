@@ -1,6 +1,7 @@
 #include "reccomendationsgui.h"
 #include "ui_reccomendationsgui.h"
 #include <sstream>
+#include <QtScript>
 reccomendationsGUI::reccomendationsGUI(QWidget *parent, QPalette* customPalette) :
     QWidget(parent),
     ui(new Ui::reccomendationsGUI)
@@ -63,49 +64,34 @@ void reccomendationsGUI::useInfo(QNetworkReply* reply){
         this->image.scaledToWidth(this->width()-20);
         ui->image->setPixmap(image);
     } else {
-        QByteArray removingQuotes = reply->readAll();
-        std::stringstream output;
-        output << removingQuotes.toStdString();
-        std::string data;
-        std::stringstream dataSplitter;
-        std::string splitData[2];
-        std::vector<std::string>:: iterator i;
-        std::getline(output,data,',');
-        while(std::getline(output,data,',')){
-            dataSplitter.clear();
-            dataSplitter << data;
-            std::getline(dataSplitter,splitData[0],':');
-            std::getline(dataSplitter,splitData[1]);
+        this->json = QJsonDocument::fromJson(reply->readAll());
+        qDebug() << json.isEmpty() << json.isArray() << json.isNull() << json.isObject();
+        this->object = json.object();
+        this->info = object.value("meals").toArray();
+        object = info.at(0).toObject();
 
-            if(splitData[0]=="\"strMealThumb\""){
-                qDebug() << QString::fromStdString(splitData[1]);
-                QString info = QString::fromStdString(splitData[1]);
-                while(info.indexOf('\\') != -1){
-                    info.remove(info.indexOf('\\'),1);
-                }
-                while(info.indexOf('\"') != -1){
-                    info.remove(info.indexOf('\"'),1);
-                }
-                qDebug() << info;
-                this->TheURL.setUrl(info);
-                this->request->setUrl(TheURL);
-                qDebug() << "after setting url";
-                this->currentReply = networkManager->get(*this->request);
-                qDebug() << "after getting request";
-            } else if(splitData[0] =="\"strInstructions\""){
-                QString info = QString::fromStdString(splitData[1]);
-
-                qDebug() << QString::fromStdString(splitData[1]);
-                std::getline(output,data,'"');
-                while(info.indexOf('\"') != -1){
-                    info.remove(info.indexOf('\"'),1);
-                }
-                info.replace("\u2019","'");
-                info.replace("\r\n"," ");
-                info.push_back(QString::fromStdString(data));
-                ui->outputText->setText(info);
+        this->TheURL = object.value("strMealThumb").toString();
+        this->request->setUrl(TheURL);
+        this->currentReply = networkManager->get(*this->request);
+        QString recipe = "";
+        QString lable;
+        for(int i=1; i<20; i++){
+            lable = "strIngredient";
+            lable += QString::number(i);
+            if(object.value(lable).toString() != ""){
+                recipe += object.value(lable).toString();
+                recipe += " - ";
+                lable = "strMeasure";
+                lable += QString::number(i);
+                recipe += object.value(lable).toString();
+                recipe += '\n';
             }
         }
+        recipe += "\n     Instructions \n";
+        recipe += object.value("strInstructions").toString();
+        ui->outputText->setText(recipe);
+
+
     }
 }
 
