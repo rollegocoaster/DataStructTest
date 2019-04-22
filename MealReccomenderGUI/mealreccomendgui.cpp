@@ -60,17 +60,17 @@ MealReccomendGUI::MealReccomendGUI(QWidget *parent) :
     ui->errorMessages->hide();
 
     // getting info from mealDatabase
-    //networkManager->connectToHostEncrypted("https://www.themealdb.com/api/json/v1/1/random.php");
-    this->timer.start(100);
 
+    this->timer.start(100);
+    qDebug() << "test";
+    this->theMealDB = new QUrl("https://www.themealdb.com/api/json/v1/1/random.php");
+    qDebug() << "test2";
+    this->request = new QNetworkRequest;
+    this->request->setUrl(*this->theMealDB);
     for(int i=0; i<NUMBER_OF_RECIPES_ADDED; i++){
-         this->theMealDB = new QUrl("https://www.themealdb.com/api/json/v1/1/random.php");
-        this->request = new QNetworkRequest();
-        if(!this->theMealDB->isValid())  qDebug() << "it is not valid";
-        qDebug() << "setting url";
-        this->request->setUrl(*this->theMealDB);
-        qDebug() << "getting request";
         this->currentReply = networkManager->get(*this->request);
+        qDebug() << i;
+
     }
     connect(networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(MealDBResult(QNetworkReply*)));
     connect(&this->timer, SIGNAL(timeout()), this, SLOT(updateInfo()));
@@ -98,7 +98,6 @@ MealReccomendGUI::~MealReccomendGUI()
 
 /*
     Preparing user inputs for sending to back end and sending it to the back end
-
 */
 void MealReccomendGUI::on_Generate_clicked()
 {
@@ -112,10 +111,15 @@ void MealReccomendGUI::on_Generate_clicked()
         UserPreferences->recipeComplexity = ui->complexity->value();
     }
     ui->errorMessages->hide();
+
+
+    // adding positive ingredients to userPreferences
     UserPreferences->positiveIngredients.clear();
     for(int i=0; i < ui->Positives_list->count(); i++){
         UserPreferences->positiveIngredients.push_back(ui->Positives_list->item(i)->text().toStdString());
     }
+    //Seperating negative ingredients from their weight
+    // and adding both to userPreferences
     UserPreferences->negativeIngredients.clear();
     UserPreferences->negativeIngredientsWeight.clear();
     for(int i=0; i < ui->Negatives_list->count(); i++){
@@ -130,13 +134,14 @@ void MealReccomendGUI::on_Generate_clicked()
         inputtedText.remove(" - ");
         UserPreferences->negativeIngredients.push_back(inputtedText.toStdString());
     }
-
+    // Adding regional food preferences to userPreferences
     if(ui->regionalFood->currentIndex()>0) UserPreferences->regionPositive = ui->regionalFood->currentText().toStdString();
     else UserPreferences->regionPositive = "";
 
     if(ui->neg_Region->currentIndex()>0) UserPreferences->regionNegative = ui->neg_Region->currentText().toStdString();
     else UserPreferences->regionNegative = "";
 
+    // adding catagory preferences to userPreferences
     if(ui->food_type->currentIndex()>0)
         UserPreferences->foodStylePositive = ui->food_type->currentText().toStdString();
     else
@@ -145,7 +150,11 @@ void MealReccomendGUI::on_Generate_clicked()
     if(ui->negFood_type->currentIndex()>0) UserPreferences->foodStyleNegative = ui->negFood_type->currentText().toStdString();
     else UserPreferences->foodStyleNegative = "";
 
-    window2->preferencesSent(UserPreferences);
+    // Sending userPreferences to backEnd
+
+    // sending backend to window 2
+    qDebug() << QString::fromStdString(this->testingReccomendation);
+    window2->showReccomendations(this->testingReccomendation);
     //this->hide();
     window2->show();
 
@@ -246,7 +255,7 @@ void MealReccomendGUI::MealDBResult(QNetworkReply* reply){
             if(i==categories.end()) categories.push_back(splitData[1]);
             //add to backend node
         } else if(splitData[0]=="strMeal"){
-            //add to backend node
+            this->testingReccomendation = splitData[1];
         } else if(splitData[0]=="strArea"){
             for(i=regions.begin(); i!=regions.end() && *i != splitData[1]; i++);
             if(i==regions.end()) regions.push_back(splitData[1]);
@@ -263,7 +272,11 @@ void MealReccomendGUI::MealDBResult(QNetworkReply* reply){
 
 //////////////////////////////////////////////////////////////////////////////
 
+
+// checks for when inputs were added and adds the food type to the respective
+// combo box
 void MealReccomendGUI::updateInfo(){
+
     if(this->inputsAdded == NUMBER_OF_RECIPES_ADDED){
 
         this->timer.stop();

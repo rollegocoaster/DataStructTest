@@ -25,6 +25,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
       QT += network
       QT += script
+      QT += gui
 
 SOURCES += \
         main.cpp \

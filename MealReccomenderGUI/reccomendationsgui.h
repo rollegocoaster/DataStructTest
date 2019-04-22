@@ -2,6 +2,8 @@
 #define RECCOMENDATIONSGUI_H
 
 #include <QWidget>
+#include <QPicture>
+#include <QtNetwork>
 //#include "mealreccomendgui.h"
 
 struct preferences{
@@ -35,13 +37,24 @@ public:
     explicit reccomendationsGUI(QWidget *parent, QPalette* customPalette);
     ~reccomendationsGUI();
 
-    void preferencesSent(preferences*);
+    void showReccomendations(std::string); //
 
 private slots:
     void on_back_clicked();
+    void useInfo(QNetworkReply*);
+
+    void on_pushButton_3_clicked();
 
 private:
+    QByteArray requestOutput;
     Ui::reccomendationsGUI *ui;
+    QNetworkReply* currentReply;
+    QNetworkAccessManager* networkManager;
+    QNetworkRequest* request;
+    QString url;
+    QUrl TheURL;
+    QPixmap image;
+    bool recipeShown = false;
 };
 
 #endif // RECCOMENDATIONSGUI_H

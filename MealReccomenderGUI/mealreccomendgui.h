@@ -88,6 +88,7 @@ private:
     std::vector<std::string>categories;
     std::vector<std::string>regions;
     int inputsAdded = 0;
+    std::string testingReccomendation;
     QTimer timer;
 
     /*Color palette
