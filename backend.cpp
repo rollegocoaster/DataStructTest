@@ -13,7 +13,7 @@ Backend::Backend(){
 }
 //destructor
 Backend::~Backend(){
-
+  delete [] Arr;
 }
 void swap(Node *a, Node *b)
 {
@@ -150,4 +150,11 @@ void Backend::addToHeap(Node recipie){
     ReHeap(&Arr,0);
     return minimum;
 
+  }
+  vector<string> Backend::GetHeap(){
+    vector<string> temp;
+    for(int i=0;i<currentSize;i++){
+      temp.push_back(Arr[i].name);
+    }
+    return temp;
   }

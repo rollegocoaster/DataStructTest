@@ -41,6 +41,8 @@ class Backend
 
   Node* removeFromHeap();//removes the root of the heap
 
+  std::vector<string> GetHeap();
+
   private:
 
   int parent(int idx);//returns parent of the given node
